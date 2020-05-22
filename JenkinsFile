@@ -1,0 +1,37 @@
+#!groovy
+
+import groovy.json.JsonSlurper
+import java.net.URL
+
+pipeline
+{
+    agent none
+    options 
+    {
+        timeout(time: 1, unit: 'DAYS')
+        disableConcurrentBuilds()
+    }
+    
+    stages
+    {
+        //Initialize Pipeline
+        stage("Initialize") 
+        {
+            agent any
+            steps {  }
+        }
+        
+        //Checkout Source Code
+        stage("Checkout")
+        {
+            agent any
+            steps { }
+        }
+        
+        //Build Application
+        stage("Build App")
+        {
+             agent any
+             steps { } 
+    }
+}
