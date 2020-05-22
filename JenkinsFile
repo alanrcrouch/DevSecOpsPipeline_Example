@@ -18,14 +18,14 @@ pipeline
         stage("Initialize") 
         {
             agent any
-            steps {  }
+            steps {initialize()}
         }
         
         //Checkout Source Code
         stage("Checkout")
         {
             agent any
-            steps { }
+            steps {checkout()}
         }
         
         //Build Application
@@ -35,3 +35,67 @@ pipeline
              steps { } 
     }
 }
+    
+//---------------------------------------------
+//Initializes all environment variables for the Jenkins Pipeline
+//---------------------------------------------
+def initialize() 
+{
+    env.SYSTEM_NAME = "DevSecOpsPipeline"
+    env.MAX_ENVIRONMENTNAME_LENGTH = 32
+    setEnvironment()
+    env.IMAGE_NAME = "hello-world:" + 
+        ((env.BRANCH_NAME == "master") ? "" : "${env.ENVIRONMENT}-") + 
+        env.BUILD_ID
+    showEnvironmentVariables()
+}
+   
+//---------------------------------------------
+//Sets environment variables for the Jenkins Pipeline
+//---------------------------------------------    
+def setEnvironment() 
+{
+    def branchName = env.BRANCH_NAME.toLowerCase()
+    def environment = 'dev'
+    echo "branchName = ${branchName}"
+    if (branchName == "") 
+    {
+        showEnvironmentVariables()
+        throw "BRANCH_NAME is not an environment variable or is empty"
+    } else if (branchName != "master") 
+    {
+        //echo "split"
+        if (branchName.contains("/")) 
+        {
+            // ignore branch type
+            branchName = branchName.split("/")[1]
+        }
+        //echo "remove '-' characters'"
+        branchName = branchName.replace("-", "")
+        // echo "limit length"
+        branchName = branchName.take(env.MAX_ENVIRONMENTNAME_LENGTH as Integer)
+        environment += "-" + branchName
+    }
+    echo "Using environment: ${environment}"
+    env.ENVIRONMENT = environment
+}    
+  
+//---------------------------------------------
+//Print environment variables to screen
+//---------------------------------------------    
+def showEnvironmentVariables() 
+{
+    sh 'env | sort > env.txt'
+    sh 'cat env.txt'
+}
+
+//---------------------------------------------
+//Pulls all neccesary source code from SCM
+//---------------------------------------------
+def checkout() 
+{
+    checkout scm
+}
+    
+
+        
